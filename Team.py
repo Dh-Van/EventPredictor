@@ -1,24 +1,54 @@
 from ApiCalls import TBA
+from geopy.geocoders import Nominatim
+import math
 
 class TeamData():
     events = []
 
     def __init__(self, team):
         self.tba = TBA()
+        self.geolocator = Nominatim(user_agent="MyApp")
         self.team = team
+        self.location = self.get_location()
         self.events = self.get_events()
-        # print(self.events)
+
+
+    def get_location(self):
+        city = self.tba.get_data("/team/frc" + str(self.team))["city"]
+        location = self.geolocator.geocode(city)
+        try:
+            return [location.latitude, location.longitude]
+        except:
+            return [0, 0]
+    
 
     def get_week_prefrence(self, event_num):
         weeks = []
-        l = len(self.events)
         for event in self.events:
             try:
                 weeks.append(event[event_num - 1][1])
             except:
                 print("Out of bounds")
 
+
         return sum(weeks) / len(self.events)
+
+    def get_location_pref(self, event_num):
+        event_locations = []
+        distances = []
+        for event in self.events:
+            try:
+                if(event[event_num - 1][1] < 6):
+                    event_locations.append(event[event_num - 1][2])
+            except:
+                print("Sadness")
+        
+        for l in event_locations:
+            distances.append(
+                math.sqrt(math.pow(abs(l[0]) - abs(self.location[0]), 2) + math.pow(abs(l[1]) - abs(self.location[1]), 2))
+            )
+
+        return (sum(distances) / len(distances)) * 69
 
     def get_events(self):
         event_data = self.tba.get_data("/team/frc" + self.team + "/events")
@@ -49,4 +79,3 @@ class TeamData():
         filtered_events.append(temp)
         
         return filtered_events
-
