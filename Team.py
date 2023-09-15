@@ -1,6 +1,7 @@
 from ApiCalls import TBA
 from geopy.geocoders import Nominatim
 import math
+import statistics
 
 class TeamData():
     events = []
@@ -12,10 +13,17 @@ class TeamData():
         self.location = self.get_location()
         self.events = self.get_events()
 
+    def test(self):
+        data = self.tba.get_data("/team/frc" + self.team)["state_prov"]
+        return data
 
     def get_location(self):
-        city = self.tba.get_data("/team/frc" + str(self.team))["city"]
-        location = self.geolocator.geocode(city)
+        data = self.tba.get_data("/team/frc" + self.team)
+        city_raw = data["city"]
+        city = city_raw.split("/")[0]
+        state = data["state_prov"]
+        address = city + ", " + state
+        location = self.geolocator.geocode(address, country_codes="US")
         try:
             return [location.latitude, location.longitude]
         except:
@@ -31,7 +39,7 @@ class TeamData():
                 print("Out of bounds")
 
 
-        return sum(weeks) / len(self.events)
+        return statistics.pstdev(weeks)
 
     def get_location_pref(self, event_num):
         event_locations = []
@@ -48,7 +56,7 @@ class TeamData():
                 math.sqrt(math.pow(abs(l[0]) - abs(self.location[0]), 2) + math.pow(abs(l[1]) - abs(self.location[1]), 2))
             )
 
-        return (sum(distances) / len(distances)) * 69
+        return statistics.pstdev(distances) * 69
 
     def get_events(self):
         event_data = self.tba.get_data("/team/frc" + self.team + "/events")
