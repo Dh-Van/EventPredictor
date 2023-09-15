@@ -66,7 +66,18 @@ class TeamData():
         if(min_event <= 0):
             min_event = 1
         
-        return [math.floor(min_event), math.ceil(max_event)], int(max_loc)
+        return [math.floor(min_event), math.ceil(max_event)], max_loc
+
+    def get_predicted_events(self, weeks, max_dist):
+        predicted_events = []
+        for event in constants.EVENTS:
+            if(event[1] >= weeks[0] and event[1] <= weeks[1]):
+                distance = math.sqrt(math.pow(abs(event[2][0]) - abs(self.location[0]), 2) + math.pow(abs(event[2][1]) - abs(self.location[1]), 2))
+                predicted_events.append([event[0], distance])
+                # if(distance <= max_dist): predicted_events.append([event[0], distance])
+        predicted_events.sort(key=lambda x:(x[1]))
+        return predicted_events[0]
+
 
     def get_events(self):
         event_data = self.tba.get_data("/team/frc" + self.team + "/events")
@@ -97,3 +108,4 @@ class TeamData():
         filtered_events.append(temp)
         
         return filtered_events
+

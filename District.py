@@ -19,7 +19,9 @@ class DistrictData():
             print(str(total - counter) + " teams left")
             curr_team = TeamData(str(team))
             data = curr_team.get_prefrence(event_num)
-            prefrences += str(team) + ", " + str(data[0][0]) + ", " + str(data[0][1]) + ", " + str(data[1]) + "\n"
+            predicted_events = curr_team.get_predicted_events(data[0], data[1])
+            prefrences += str(team) + ", " + str(predicted_events) + "\n"
+            # prefrences += str(team) + ", " + str(data[0][0]) + ", " + str(data[0][1]) + ", " + str(data[1]) + "\n"
             counter += 1
 
         file_name = ""

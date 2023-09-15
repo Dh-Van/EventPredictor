@@ -10,6 +10,13 @@ class TBA:
         response = requests.get(url)
         return json.loads(response.text)
 
+    def generate_2023_events(self):
+        events = self.get_data("/district/2023ne/events")
+        output = []
+        for e in events:
+            output.append([e["key"], e["week"], [e["lat"], e["lng"]]])
+        return output
+
 class Statbotics:
     def __init__(self):
         self.sb = statbotics.Statbotics()
