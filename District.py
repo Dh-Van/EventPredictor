@@ -1,44 +1,39 @@
 from ApiCalls import TBA
 from ApiCalls import Statbotics
 from Team import TeamData
+import constants
 
 class DistrictData():
-
-    premade_list = [
-        1100, 125, 133, 1757, 176, 1768, 177, 195, 230, 319, 3205, 3467, 4909, 5687, 6328, 6329, 7407, 8013, 8046, 8085, 88, 95
-    ]
 
     def __init__(self):
         self.tba = TBA()
         self.sb = Statbotics()
-        file = ""
-        teams = self.tba.get_data("/district/2023ne/teams")
-        counter = 0
-        c = len(teams)
-        # team_list = []
-        # for team in teams:
-        #     print(str(c - counter) + " teams left")
-        #     team_number = team["team_number"]
-        #     if(not self.sb.check_epa(1658, team_number)): 
-        #         counter += 1
-        #         continue
-        #     team_list.append(team_number)
-        #     counter += 1
+        # file = ""
+        # teams = self.tba.get_data("/district/2023ne/teams")
 
-        counter = 0
-        c = len(self.premade_list)
-        for team in self.premade_list:
-            print(str(c - counter) + " teams left")
-            temp_team = TeamData(str(team))
-            w1_pref = temp_team.get_week_prefrence(1)
-            loc_pref = temp_team.get_location_pref(1)
-            s = "" + str(team) + ", " + str(w1_pref) + ", " + str(loc_pref) + "\n"
-            file += s
+    def get_event_prefrences(self, event_num, team_list):
+        prefrences = ""
+        counter, total = 0, len(team_list)
+
+        for team in team_list:
+            print(str(total - counter) + " teams left")
+            curr_team = TeamData(str(team))
+            data = curr_team.get_prefrence(event_num)
+            prefrences += str(team) + ", " + str(data[0][0]) + ", " + str(data[0][1]) + ", " + str(data[1]) + "\n"
             counter += 1
 
-        f = open("data.txt", "a")
-        f.write(file)
+        file_name = ""
+        if(event_num == 1): 
+            file_name += "First" 
+        else: 
+            file_name += "Second"
+        self.write_to_file(file_name + "_Event_Data.txt", prefrences)
+
+    def write_to_file(self, file_name, text):
+        f = open(file_name, "w")
+        f.write(text)
         f.close()
 
 
 New_England = DistrictData()
+New_England.get_event_prefrences(1, constants.TEN_TEAMS)

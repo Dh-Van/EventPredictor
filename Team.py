@@ -2,6 +2,7 @@ from ApiCalls import TBA
 from geopy.geocoders import Nominatim
 import math
 import statistics
+import constants
 
 class TeamData():
     events = []
@@ -12,10 +13,6 @@ class TeamData():
         self.team = team
         self.location = self.get_location()
         self.events = self.get_events()
-
-    def test(self):
-        data = self.tba.get_data("/team/frc" + self.team)["state_prov"]
-        return data
 
     def get_location(self):
         data = self.tba.get_data("/team/frc" + self.team)
@@ -38,8 +35,7 @@ class TeamData():
             except:
                 print("Out of bounds")
 
-
-        return statistics.pstdev(weeks)
+        return sum(weeks) / len(weeks), statistics.pstdev(weeks)
 
     def get_location_pref(self, event_num):
         event_locations = []
@@ -56,7 +52,21 @@ class TeamData():
                 math.sqrt(math.pow(abs(l[0]) - abs(self.location[0]), 2) + math.pow(abs(l[1]) - abs(self.location[1]), 2))
             )
 
-        return statistics.pstdev(distances) * 69
+        return sum(distances) / len(distances), statistics.pstdev(distances) * 69
+
+    def get_prefrence(self, event_num):
+        avg_event, std_event = self.get_week_prefrence(event_num)
+        avg_loc, std_loc = self.get_location_pref(event_num)
+
+        event_coef = 1.96 * (std_event / (math.sqrt(len(constants.YEAR_RANGE) - len(constants.EXCLUDED_YEARS))))
+        loc_coef = 1.96 * (std_loc / (math.sqrt(len(constants.YEAR_RANGE) - len(constants.EXCLUDED_YEARS))))
+
+        min_event, max_event = (avg_event - event_coef), (avg_event + event_coef)
+        max_loc = loc_coef * 2
+        if(min_event <= 0):
+            min_event = 1
+        
+        return [math.floor(min_event), math.ceil(max_event)], int(max_loc)
 
     def get_events(self):
         event_data = self.tba.get_data("/team/frc" + self.team + "/events")
