@@ -18,10 +18,16 @@ class DistrictData():
         for team in team_list:
             print(str(total - counter) + " teams left")
             curr_team = TeamData(str(team))
-            data = curr_team.get_prefrence(event_num)
-            predicted_events = curr_team.get_predicted_events(data[0], data[1])
-            prefrences += str(team) + ", " + str(predicted_events) + "\n"
-            # prefrences += str(team) + ", " + str(data[0][0]) + ", " + str(data[0][1]) + ", " + str(data[1]) + "\n"
+            # data = curr_team.get_prefrence(event_num)
+            data = curr_team.get_mean_std(event_num)
+
+            # predicted_events = curr_team.get_predicted_events(data[0], data[1])
+            # data_string = ""
+            # for d in data:
+            #     data_string += d + ", "
+            # data_string = data_string[:-1]
+            prefrences += str(team) + ", " + str(data) + "\n"
+            # prefrences += str(team) + ", " + str(data[0]) + ", " + str(data[1]) + "\n"
             counter += 1
 
         file_name = ""
@@ -38,4 +44,4 @@ class DistrictData():
 
 
 New_England = DistrictData()
-New_England.get_event_prefrences(1, constants.TEN_TEAMS)
+New_England.get_event_prefrences(1, constants.TOP_NE_TEAMS)

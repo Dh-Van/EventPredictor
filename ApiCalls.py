@@ -2,6 +2,7 @@ import requests
 import json
 import statbotics
 import constants
+from geopy.geocoders import Nominatim
 
 class TBA:
     def get_data(self, query: str):
@@ -10,12 +11,30 @@ class TBA:
         response = requests.get(url)
         return json.loads(response.text)
 
-    def generate_2023_events(self):
-        events = self.get_data("/district/2023ne/events")
+    def generate_2024_events(self):
+        self.geolocator = Nominatim(user_agent="MyApp")
+        events = self.get_data("/district/2024ne/events")
         output = []
         for e in events:
-            output.append([e["key"], e["week"], [e["lat"], e["lng"]]])
+            city_raw = e["city"]
+            city = city_raw.split("/")[0]
+            state = e["state_prov"]
+            address = city + ", " + state
+            location = self.geolocator.geocode(address, country_codes="US")
+            output.append([e["name"], e["week"], [location.latitude, location.longitude]])
         return output
+    
+    def get_location(self):
+        data = self.tba.get_data("/team/frc" + self.team)
+        city_raw = data["city"]
+        city = city_raw.split("/")[0]
+        state = data["state_prov"]
+        address = city + ", " + state
+        location = self.geolocator.geocode(address, country_codes="US")
+        try:
+            return [location.latitude, location.longitude]
+        except:
+            return [0, 0]
 
 class Statbotics:
     def __init__(self):
@@ -29,3 +48,6 @@ class Statbotics:
             print("invalid query")
             return False
         return False
+    
+t = TBA()
+print(t.generate_2024_events())
